@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include "Read_Data.cpp"
 using namespace std;
 
 class node
@@ -22,6 +23,8 @@ layer second_layer;
 layer output_layer;
 vector<layer> NN = {input_layer, first_layer, second_layer, output_layer};
 
+
 int main()
 {
+    
 }
