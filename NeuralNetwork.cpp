@@ -59,6 +59,8 @@ int main()
 {
     std::vector<MNISTImage> dataset = load_mnist("train-images-idx3-ubyte", "train-labels-idx1-ubyte");
 
+    //initialize the weights here, 12960 weights
+
     for (int i = 0; i < dataset.size(); i++) // loop iterates over the dataset over every image
     {                                        // 784
         for (int j = 0; j < 784; j++)
@@ -67,38 +69,42 @@ int main()
         }
         // now the input layer is initialized
 
+
+
+
+
         for (node selected_node : first_layer.getNodes())
         {
             selected_node.value = sigmoid(dot(selected_node.weights, input_layer) + selected_node.bias);
-        }
+        }//first layer values done
 
         vector<double> l1(16);
-        for (int j = 0; j < 16; j++)
+        for (int j = 0; j < 16; j++)//i converted them into a double array to pass into the dot product function    
         {
-            l1[i]=(first_layer.getNodes())[j].value;
+            l1[j]=(first_layer.getNodes())[j].value;
         }
         for (node selected_node : second_layer.getNodes())
         {
 
             selected_node.value = sigmoid(dot(selected_node.weights, l1) + selected_node.bias);
-        }
+        }//second layer values done
 
 
         vector<double> l2(16);
         for (int j = 0; j < 16; j++)
         {
-            l2[i]=(second_layer.getNodes())[j].value;
+            l2[j]=(second_layer.getNodes())[j].value;
         }
         for (node selected_node :output_layer.getNodes())
         {
 
             selected_node.value = sigmoid(dot(selected_node.weights, l2) + selected_node.bias);
-        } 
+        } //output layer values done
 
         vector<double> l3(10);
         for (int j = 0; j < 10; j++)
         {
-            l3[i]=(output_layer.getNodes())[j].value;
+            l3[j]=(output_layer.getNodes())[j].value;
         }
     }
 }
