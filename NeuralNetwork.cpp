@@ -19,24 +19,31 @@ public:
     vector<double> weights;     //gotta randomly set them and check their domain
 };                                  //maybe read em from another file
 
-class layer
-{
+class layer {
 public:
-    vector<node> nodes;             //gotta find a way to initialize different vectors inside to
-};                                  //different sizes acc to each layer
+    layer(int size) : nodes(size) {}
+
+private:
+    std::vector<node> nodes;
+public:
+    vector<node> getNodes(){
+        return nodes;
+    }
+};                                
 
 double dot(vector<double> v1,vector<double> v2){
     double result=0;
     for(int i=0;i<v1.size();i++){
         result+=v1[i]*v2[i];
     }
+    return result;
 }
 
-layer input_layer;  //maybe dont define this as a layer which has a nodes array, instead make its own stuff with its own kind of nodes which take value as an input
-layer first_layer;      //global variables might be a problem
-layer second_layer;     
-layer output_layer;
-vector<layer> NN = {input_layer, first_layer, second_layer, output_layer};
+vector<double> input_layer(784);  //each image is 28*28 pixel array
+layer first_layer(16);      //global variables might be a problem
+layer second_layer(16);     
+layer output_layer(10);
+vector<layer> NN = {first_layer, second_layer, output_layer};
 
 int main()
 {
@@ -46,7 +53,7 @@ int main()
     {                                        // 784
         for (int j = 0; j < 784; j++)
         { 
-            input_layer.nodes[j].value = static_cast<double>(dataset[i].pixels[j]);
+            input_layer[j] = static_cast<double>(dataset[i].pixels[j]);
         }
         // now the input layer is initialized
 
