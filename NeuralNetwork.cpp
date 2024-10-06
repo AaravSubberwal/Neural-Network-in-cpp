@@ -4,13 +4,13 @@ Author: Aarav Subberwal
 Date:
 
 Work in progress
--Weights and biases are not yet initialized
 -project will have 2 cpp files one for training and one for testing and checking accuracy
 -one for testing will read weights and biases from a file
 ***************************************************************************************************/
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <cstdlib>
 #include "Read_Data.cpp"
 using namespace std;
 
@@ -21,111 +21,97 @@ public:
     vector<double> weights; // gotta randomly set them and check their domain
 }; // maybe read em from another file
 
-class layer
-{
-public:
-    layer(int size) : nodes(size) {}
-
-private:
-    std::vector<node> nodes;
-
-public:
-    vector<node> getNodes()
-    {
-        return nodes;
-    }
-};
-
-double dot(vector<double> v1, vector<double> v2)
+double dot(vector<double> v1, vector<node> v2)
 {
     double result = 0;
-    for (int i = 0; i < v1.size(); i++)
+    if (v1.size() == v2.size())
     {
-        result += v1[i] * v2[i]; // optimize this somehow
+        for (int i = 0; i < v1.size(); i++)
+        {
+            result += v1[i] * v2[i].value; // optimize this somehow
+        }
+        return result;
     }
-    return result;
+    else
+    {
+        cout << "tu chutiya hai";
+        return 0;
+    }
 }
 
 double sigmoid(double n)
 {
     return 1 / (1 + exp(-n));
 }
+double relu(double n)
+{
+    return (n > 0) ? n : 0;
+}
 
 int main()
 {
-    std::vector<MNISTImage> dataset = load_mnist("train-images-idx3-ubyte", "train-labels-idx1-ubyte");
-    
-    vector<double> input_layer(784); // each image is 28*28 pixel array
-    layer first_layer(16);          
-    layer second_layer(16);
-    layer output_layer(10);
-    vector<layer> NN = {first_layer, second_layer, output_layer};
-    
-    std::ifstream inFile("InitialWeightsBiases", std::ios::binary);
-    if (!inFile) {
+    //std::vector<MNISTImage> dataset = load_mnist("train-images-idx3-ubyte", "train-labels-idx1-ubyte");
+
+    vector<node> input_layer(784); // each image is 28*28 pixel array
+    vector<node> first_layer(16);
+    vector<node> second_layer(16);
+    vector<node> output_layer(10);
+
+    std::ifstream inFile("InitialWeightsBiases.bin", std::ios::binary);
+    if (!inFile)
+    {
         std::cerr << "Error opening file for reading!" << std::endl;
         return 1;
     }
     std::vector<double> buffer(784);
-    for(int i=0;i<16;i++){//first layer nodes weights initialized
-        inFile.read(reinterpret_cast<char*>(buffer.data()), 784 * sizeof(double));
-        first_layer.getNodes()[i].weights=buffer;
-        first_layer.getNodes()[i].bias=0;
+    for (int i = 0; i < 16; i++)
+    { // first layer nodes weights and biases initialized
+        inFile.read(reinterpret_cast<char *>(buffer.data()), 784 * sizeof(double));
+        first_layer[i].weights = buffer;
+        first_layer[i].bias = (rand() / (RAND_MAX + 1.0)) - 0.5;
     }
     buffer.resize(16);
-    for(int i=0;i<16;i++){//second layer nodes weights initialized
-        inFile.read(reinterpret_cast<char*>(buffer.data()), 16 * sizeof(double));
-        second_layer.getNodes()[i].weights=buffer;
-        second_layer.getNodes()[i].bias=0;
+    for (int i = 0; i < 16; i++)
+    { // second layer nodes weights and biases initialized
+        inFile.read(reinterpret_cast<char *>(buffer.data()), 16 * sizeof(double));
+        second_layer[i].weights = buffer;
+        second_layer[i].bias = (rand() / (RAND_MAX + 1.0)) - 0.5;
     }
-    buffer.resize(16);
-    for(int i=0;i<16;i++){//output layer nodes weights initialized
-        inFile.read(reinterpret_cast<char*>(buffer.data()), 16 * sizeof(double));
-        output_layer.getNodes()[i].weights=buffer;
-        output_layer.getNodes()[i].bias=0;
+    for (int i = 0; i < 10; i++)
+    { // output layer nodes weights and biases initialized
+        inFile.read(reinterpret_cast<char *>(buffer.data()), 16 * sizeof(double));
+        output_layer[i].weights = buffer;
+        output_layer[i].bias = (rand() / (RAND_MAX + 1.0)) - 0.5;
     }
-    inFile.close();
+    //for (int i = 0; i < dataset.size(); i++)
+     // loop iterates over the dataset over every image
 
-    for (int i = 0; i < dataset.size(); i++) // loop iterates over the dataset over every image
-    {                                        // 784
         for (int j = 0; j < 784; j++)
         {
-            input_layer[j] = static_cast<double>(dataset[i].pixels[j]);
+            input_layer[j].value = 30;
         }
+        //static_cast<double>(dataset[i].pixels[j])
         // now the input layer is initialized
 
-        for (node selected_node : first_layer.getNodes())
-        {
-            selected_node.value = sigmoid(dot(selected_node.weights, input_layer) + selected_node.bias);
-        } // first layer values done
-
-        vector<double> l1(16);
-        for (int j = 0; j < 16; j++) // i converted them into a double array to pass into the dot product function
-        {
-            l1[j] = (first_layer.getNodes())[j].value;
-        }
-        for (node selected_node : second_layer.getNodes())
-        {
-
-            selected_node.value = sigmoid(dot(selected_node.weights, l1) + selected_node.bias);
-        } // second layer values done
-
-        vector<double> l2(16);
         for (int j = 0; j < 16; j++)
         {
-            l2[j] = (second_layer.getNodes())[j].value;
-        }
-        for (node selected_node : output_layer.getNodes())
+            first_layer[j].value = relu((dot(first_layer[j].weights, input_layer)) + first_layer[j].bias);
+            cout << first_layer[j].value << "\n";
+        } // first layer values done
+        cout << "\n\n";
+        for (node &selected_node : second_layer)
         {
-
-            selected_node.value = sigmoid(dot(selected_node.weights, l2) + selected_node.bias);
+            selected_node.value = relu(dot(selected_node.weights, first_layer) + selected_node.bias);
+            cout << selected_node.value << '\n';
+        } // second layer values done
+        cout << "\n\n";
+        for (node &selected_node : output_layer)
+        {
+            selected_node.value = relu(dot(selected_node.weights, second_layer) + selected_node.bias);
+            cout << selected_node.value << '\n';
         } // output layer values done
-
-        vector<double> l3(10);
-        for (int j = 0; j < 10; j++)
-        {
-            l3[j] = (output_layer.getNodes())[j].value;
-        }
-        //calculated mean square error
-    }
+    
+    // calculated mean square error
+    inFile.close();
+    return 0;
 }
