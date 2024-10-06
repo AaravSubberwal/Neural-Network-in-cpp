@@ -60,10 +60,31 @@ int main()
     layer second_layer(16);
     layer output_layer(10);
     vector<layer> NN = {first_layer, second_layer, output_layer};
-    // initialize the weights here, 12960 weights
-    //definately read em from a file
     
-
+    std::ifstream inFile("InitialWeightsBiases", std::ios::binary);
+    if (!inFile) {
+        std::cerr << "Error opening file for reading!" << std::endl;
+        return 1;
+    }
+    std::vector<double> buffer(784);
+    for(int i=0;i<16;i++){//first layer nodes weights initialized
+        inFile.read(reinterpret_cast<char*>(buffer.data()), 784 * sizeof(double));
+        first_layer.getNodes()[i].weights=buffer;
+        first_layer.getNodes()[i].bias=0;
+    }
+    buffer.resize(16);
+    for(int i=0;i<16;i++){//second layer nodes weights initialized
+        inFile.read(reinterpret_cast<char*>(buffer.data()), 16 * sizeof(double));
+        second_layer.getNodes()[i].weights=buffer;
+        second_layer.getNodes()[i].bias=0;
+    }
+    buffer.resize(16);
+    for(int i=0;i<16;i++){//output layer nodes weights initialized
+        inFile.read(reinterpret_cast<char*>(buffer.data()), 16 * sizeof(double));
+        output_layer.getNodes()[i].weights=buffer;
+        output_layer.getNodes()[i].bias=0;
+    }
+    inFile.close();
 
     for (int i = 0; i < dataset.size(); i++) // loop iterates over the dataset over every image
     {                                        // 784
