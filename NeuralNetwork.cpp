@@ -68,50 +68,50 @@ int main()
     { // first layer nodes weights and biases initialized
         inFile.read(reinterpret_cast<char *>(buffer.data()), 784 * sizeof(double));
         first_layer[i].weights = buffer;
-        first_layer[i].bias = (rand() / (RAND_MAX + 1.0)) - 0.5;
+        first_layer[i].bias = ((rand() / (RAND_MAX + 1.0)) - 0.5)*0;
     }
     buffer.resize(16);
     for (int i = 0; i < 16; i++)
     { // second layer nodes weights and biases initialized
         inFile.read(reinterpret_cast<char *>(buffer.data()), 16 * sizeof(double));
         second_layer[i].weights = buffer;
-        second_layer[i].bias = (rand() / (RAND_MAX + 1.0)) - 0.5;
+        second_layer[i].bias = ((rand() / (RAND_MAX + 1.0)) - 0.5)*0;
     }
     for (int i = 0; i < 10; i++)
     { // output layer nodes weights and biases initialized
         inFile.read(reinterpret_cast<char *>(buffer.data()), 16 * sizeof(double));
         output_layer[i].weights = buffer;
-        output_layer[i].bias = (rand() / (RAND_MAX + 1.0)) - 0.5;
+        output_layer[i].bias = ((rand() / (RAND_MAX + 1.0)) - 0.5)*0;
     }
+    inFile.close();
     //for (int i = 0; i < dataset.size(); i++)
      // loop iterates over the dataset over every image
 
         for (int j = 0; j < 784; j++)
         {
-            input_layer[j].value = 30;
+            input_layer[j].value = 0.3;
         }
         //static_cast<double>(dataset[i].pixels[j])
         // now the input layer is initialized
 
         for (int j = 0; j < 16; j++)
         {
-            first_layer[j].value = relu((dot(first_layer[j].weights, input_layer)) + first_layer[j].bias);
+            first_layer[j].value = sigmoid((dot(first_layer[j].weights, input_layer)) + first_layer[j].bias);
             cout << first_layer[j].value << "\n";
         } // first layer values done
         cout << "\n\n";
         for (node &selected_node : second_layer)
         {
-            selected_node.value = relu(dot(selected_node.weights, first_layer) + selected_node.bias);
+            selected_node.value = sigmoid(dot(selected_node.weights, first_layer) + selected_node.bias);
             cout << selected_node.value << '\n';
         } // second layer values done
         cout << "\n\n";
         for (node &selected_node : output_layer)
         {
-            selected_node.value = relu(dot(selected_node.weights, second_layer) + selected_node.bias);
+            selected_node.value = sigmoid(dot(selected_node.weights, second_layer) + selected_node.bias);
             cout << selected_node.value << '\n';
         } // output layer values done
     
     // calculated mean square error
-    inFile.close();
     return 0;
 }
