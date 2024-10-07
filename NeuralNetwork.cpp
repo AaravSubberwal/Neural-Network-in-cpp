@@ -4,8 +4,6 @@ Author: Aarav Subberwal
 Date:
 
 Work in progress
--project will have 2 cpp files one for training and one for testing and checking accuracy
--one for testing will read weights and biases from a file
 ***************************************************************************************************/
 #include <iostream>
 #include <cmath>
@@ -17,9 +15,9 @@ using namespace std;
 class node
 {
 public:
-    double bias, value;     // value must be calculated using sigmoid function
-    vector<double> weights; // gotta randomly set them and check their domain
-}; // maybe read em from another file
+    double bias, value;     
+    vector<double> weights; 
+}; 
 
 double dot(vector<double> v1, vector<node> v2)
 {
@@ -34,7 +32,7 @@ double dot(vector<double> v1, vector<node> v2)
     }
     else
     {
-        cout << "tu chutiya hai";
+        cout << "vector size equal nhi hai chuutiye";
         return 0;
     }
 }
@@ -60,7 +58,7 @@ int main()
     std::ifstream inFile("InitialWeightsBiases.bin", std::ios::binary);
     if (!inFile)
     {
-        std::cerr << "Error opening file for reading!" << std::endl;
+        std::cerr << "tu chutiya hai (file read)" << std::endl;
         return 1;
     }
     std::vector<double> buffer(784);
@@ -96,13 +94,13 @@ int main()
 
         for (int j = 0; j < 16; j++)
         {
-            first_layer[j].value = sigmoid((dot(first_layer[j].weights, input_layer)) + first_layer[j].bias);
+            first_layer[j].value = relu((dot(first_layer[j].weights, input_layer)) + first_layer[j].bias);
             cout << first_layer[j].value << "\n";
         } // first layer values done
         cout << "\n\n";
         for (node &selected_node : second_layer)
         {
-            selected_node.value = sigmoid(dot(selected_node.weights, first_layer) + selected_node.bias);
+            selected_node.value = relu(dot(selected_node.weights, first_layer) + selected_node.bias);
             cout << selected_node.value << '\n';
         } // second layer values done
         cout << "\n\n";
