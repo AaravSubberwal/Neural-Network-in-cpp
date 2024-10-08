@@ -1,4 +1,3 @@
-
 /***************************************************************************************************
 Author: Aarav Subberwal
 Date:
@@ -15,9 +14,9 @@ using namespace std;
 class node
 {
 public:
-    double bias, value;     
-    vector<double> weights; 
-}; 
+    double bias, value;
+    vector<double> weights;
+};
 
 double dot(vector<double> v1, vector<node> v2)
 {
@@ -48,7 +47,7 @@ double relu(double n)
 
 int main()
 {
-    //std::vector<MNISTImage> dataset = load_mnist("train-images-idx3-ubyte", "train-labels-idx1-ubyte");
+    std::vector<MNISTImage> dataset = load_mnist("train-images.idx3-ubyte", "train-labels.idx1-ubyte");
 
     vector<node> input_layer(784); // each image is 28*28 pixel array
     vector<node> first_layer(16);
@@ -66,31 +65,31 @@ int main()
     { // first layer nodes weights and biases initialized
         inFile.read(reinterpret_cast<char *>(buffer.data()), 784 * sizeof(double));
         first_layer[i].weights = buffer;
-        first_layer[i].bias = ((rand() / (RAND_MAX + 1.0)) - 0.5)*0;
+        first_layer[i].bias = ((rand() / (RAND_MAX + 1.0)) - 0.5) * 0;
     }
     buffer.resize(16);
     for (int i = 0; i < 16; i++)
     { // second layer nodes weights and biases initialized
         inFile.read(reinterpret_cast<char *>(buffer.data()), 16 * sizeof(double));
         second_layer[i].weights = buffer;
-        second_layer[i].bias = ((rand() / (RAND_MAX + 1.0)) - 0.5)*0;
+        second_layer[i].bias = ((rand() / (RAND_MAX + 1.0)) - 0.5) * 0;
     }
     for (int i = 0; i < 10; i++)
     { // output layer nodes weights and biases initialized
         inFile.read(reinterpret_cast<char *>(buffer.data()), 16 * sizeof(double));
         output_layer[i].weights = buffer;
-        output_layer[i].bias = ((rand() / (RAND_MAX + 1.0)) - 0.5)*0;
+        output_layer[i].bias = ((rand() / (RAND_MAX + 1.0)) - 0.5) * 0;
     }
     inFile.close();
     //for (int i = 0; i < dataset.size(); i++)
-     // loop iterates over the dataset over every image
-
+    
+        // loop iterates over the dataset over every image
         for (int j = 0; j < 784; j++)
         {
-            input_layer[j].value = 0.3;
+            input_layer[j].value = static_cast<double>(dataset[0].pixels[j]);
         }
-        //static_cast<double>(dataset[i].pixels[j])
-        // now the input layer is initialized
+        // static_cast<double>(dataset[i].pixels[j])
+        //  now the input layer is initialized
 
         for (int j = 0; j < 16; j++)
         {
@@ -98,18 +97,31 @@ int main()
             cout << first_layer[j].value << "\n";
         } // first layer values done
         cout << "\n\n";
-        for (node &selected_node : second_layer)
+
+        for (int j = 0; j < 16; j++)
         {
-            selected_node.value = relu(dot(selected_node.weights, first_layer) + selected_node.bias);
-            cout << selected_node.value << '\n';
+            second_layer[j].value = relu(dot(second_layer[j].weights, first_layer) + second_layer[j].bias);
+            cout << second_layer[j].value << '\n';
         } // second layer values done
         cout << "\n\n";
-        for (node &selected_node : output_layer)
+
+        double MSE = 0;//Mean Square Error
+        vector<double> expected_output(10);
+        for (int j = 0; j < 10; j++)
+        {//set it to 0
+            expected_output[j] = 0;
+        }
+        expected_output[dataset[0].label] = dataset[0].label;
+        
+        for (int j = 0; j < 10; j++)
         {
-            selected_node.value = sigmoid(dot(selected_node.weights, second_layer) + selected_node.bias);
-            cout << selected_node.value << '\n';
-        } // output layer values done
+            output_layer[j].value = sigmoid(dot(output_layer[j].weights, second_layer) + output_layer[j].bias);
+            cout << output_layer[j].value << '\n';
+            MSE += pow((output_layer[j].value - expected_output[j]), 2);
+        } // output layer values and mean square error done
+        cout << "\n\n"<< MSE;
+
+
     
-    // calculated mean square error
     return 0;
 }
